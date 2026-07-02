@@ -18,5 +18,9 @@ const router=Router()
     router.get('/profile',
     authMiddleware.userAuthMiddleware,
     userController.userProfileController)
+    
+     router.get('/logout',
+    authMiddleware.userAuthMiddleware,
+    userController.logoutController)
 
 export default router
