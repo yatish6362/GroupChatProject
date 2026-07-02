@@ -4,9 +4,14 @@ import { body } from "express-validator"
 
 const router=Router()
 
-router.post('/register',
+    router.post('/register',
     body('email').isEmail().withMessage('Please enter a valid email address'),
     body('password').isLength({min:3}).withMessage('minimum length 3')
     ,userController.createUserController)
+
+    router.post('/login',
+    body('email').isEmail().withMessage('Please enter a valid email address'),
+    body('password').isLength({min:3}).withMessage('minimum length 3')
+    ,userController.loginUserController)
 
 export default router
