@@ -27,3 +27,19 @@ export const createProject=async(req,res)=>{
             })
         }
 }
+
+export const getAllProject=async(req,res)=>{
+    try{
+        const loginUser=await userModel.findOne({email:req.user.email})
+        const allUserProject=await projectService.getAllUserProject({userId:loginUser._id})
+        
+        res.status(200).json({
+            projects:allUserProject
+        })
+    }
+    catch(err){
+        res.status(400).json({
+            error:err.message
+        })
+    }
+}
