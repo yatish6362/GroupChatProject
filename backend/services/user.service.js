@@ -13,3 +13,13 @@ export const createUser=async({email,password})=>{
 
     return user
 }
+export const getAllUsers=async({userId})=>{
+    if(!userId){
+        throw new Error('user id is required')
+    }
+    const allUsers=await userModel.find({
+        _id:{$ne:userId}
+    })
+
+    return allUsers
+}

@@ -23,4 +23,9 @@ const router=Router()
     authMiddleware.userAuthMiddleware,
     userController.logoutController)
 
+    router.get('/all',
+        authMiddleware.userAuthMiddleware,
+        userController.getAllUsersController
+    )
+
 export default router
