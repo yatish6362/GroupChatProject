@@ -4,6 +4,7 @@ import Home from '../screens/Home'
 import Login from '../screens/Login'
 import Register from '../screens/Register'
 import Projects from '../screens/Projects'
+import UserAuth from '../auth/UserAuth'
 
 const AppRoutes = () => {
   return (
