@@ -1,11 +1,15 @@
 import React, { useContext, useState } from 'react'
 import {UserContext} from '../context/user.context'
 import axios from '../config/axios.js'
+import { useEffect } from 'react'
+import {useNavigate} from 'react-router-dom'
 
 const Home = () => {
+      const navigate=useNavigate()
       const {user}=useContext(UserContext)
       const [isModalOpen, setisModalOpen] = useState(false)
       const [projectName, setprojectName] = useState('')
+      const [projects,setProjects]=useState([])
       async function handleSubmit(e) {
         e.preventDefault()
         await axios.post('/projects/create',{name:projectName})
@@ -18,8 +22,17 @@ const Home = () => {
           console.log(err.message);
         })
       }
+      useEffect(()=>{
+        axios.get('/projects/all')
+        .then((res)=>{
+          setProjects(res.data.projects)
+        })
+        .catch((err)=>{
+          console.log(err.response.data);
+        })
+      },[])
   return (
-   <main className='min-h-screen bg-slate-950 flex justify-center items-center text-slate-100'>
+   <main className='min-h-screen bg-slate-950 p-5 text-slate-100'>
     <div className="flex items-center gap-4">
       <button
         onClick={() => setisModalOpen(true)}
@@ -32,11 +45,24 @@ const Home = () => {
         <p className='mt-2 text-sm text-slate-400'>Create a new project to begin tracking.</p>
       </div>
     </div>
-    
+    {projects.length > 0 ? (
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {projects.map((project) => (
+          <div
+          onClick={()=>{navigate('/project',{state:{project}})}}
+          key={project._id} className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+            <h3 className="text-lg font-semibold text-white">{project.name}</h3>
+            <p className='py-2'><i className='ri-user-line'></i>Collabraters :{project.users.length}</p>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <p className="mt-4 text-slate-400">No projects found.</p>
+    )}
 
     {isModalOpen && (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 p-4">
-        <div className="w-full max-w-md rounded-[32px] border border-slate-800 bg-slate-900 p-6 shadow-2xl shadow-slate-950">
+        <div className="w-full max-w-md rounded-4xl border border-slate-800 bg-slate-900 p-6 shadow-2xl shadow-slate-950">
           <div className="mb-6 flex items-start justify-between gap-4">
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-slate-500">New project</p>
