@@ -6,6 +6,7 @@ import { Server } from 'socket.io'
 import mongoose from 'mongoose'
 import projectModel from './models/project.model.js'
 import { log } from 'console'
+import { generateResult } from './services/ai.service.js'
 
 const PORT=process.env.PORT||4000
 
@@ -50,9 +51,30 @@ io.on('connection',socket=>{
 
     socket.join(socket.roomId)
 
-    socket.on('project-message',data=>{
+    socket.on('project-message',async(data)=>{
 
         socket.broadcast.to(socket.roomId).emit('project-message',data)
+
+        const message=data.message
+
+        const isAiPresent=message.includes('@ai')
+
+        if(isAiPresent){
+            const prompt =message.replace('@ai','')
+            const result=await generateResult(prompt)
+
+            io.to(socket.roomId).emit('project-message',{
+                message:result,
+                sender:{
+                    _id:"ai",
+                    email:"AI"
+                }
+            })
+
+            return
+        }
+
+       
 
     })
     socket.on('disconnect',()=>{

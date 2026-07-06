@@ -7,6 +7,7 @@ import {
   receiveMessage,
 } from "../config/socket.js";
 import { UserContext } from "../context/user.context.jsx";
+import Markdown from "markdown-to-jsx";
 
 const Projects = () => {
   const location = useLocation();
@@ -17,15 +18,19 @@ const Projects = () => {
   const [project, setProject] = useState(location.state.project);
   const [message, setMessage] = useState("");
   const { user } = useContext(UserContext);
-  const messageBox=useRef()
-  
+  const messageBox = useRef();
+  const [messages, setMessages] = useState([]);
 
   function send() {
-    sendMessage("project-message", {
+    const newMessage = {
       message,
-      sender: user.email,
-    });
-    appendOutgoingMessage(message)
+      sender: user,
+    };
+
+    sendMessage("project-message", newMessage);
+
+    setMessages((prev) => [...prev, newMessage]);
+
     setMessage("");
   }
 
@@ -33,9 +38,9 @@ const Projects = () => {
     initializeSocket(project._id);
 
     receiveMessage("project-message", (data) => {
-      console.log(data);
-      appendIncomingMessage(data)
+      setMessages((prev) => [...prev, data]);
     });
+
     axios
       .get(`/projects/get-project/${location.state.project._id}`)
       .then((res) => {
@@ -77,29 +82,6 @@ const Projects = () => {
     );
   };
 
-  function appendIncomingMessage(messageObject) {
-    const messageBox=document.querySelector('.message-box')
-    const message = document.createElement("div");
-    message.classList.add('message','flex','w-fit','max-w-56','flex-col','rounded-md','bg-amber-50','p-2','m-2')
-    message.innerHTML=`
-    <small className='opacity-65 text-xs'>${messageObject.sender} </small> 
-    <p className='text-sm'>${messageObject.message}</p>
-    `
-    messageBox.appendChild(message)
-  
-  }
-  function appendOutgoingMessage(messageObject) {
-    const messageBox=document.querySelector('.message-box')
-    const message = document.createElement("div");
-    message.classList.add('message','ml-auto','flex','w-fit','max-w-56','flex-col','rounded-md','bg-amber-50','p-2','m-2')
-    message.innerHTML=`
-    <small className='opacity-65 text-xs'>${user.email} </small> 
-    <p className='text-sm'>${messageObject}</p>
-    `
-    messageBox.appendChild(message)
-    
-  }
-  
 
   return (
     <main className="min-h-screen w-full bg-slate-100">
@@ -123,17 +105,28 @@ const Projects = () => {
 
           <div className="conversation-area flex grow flex-col">
             <div
-            ref={messageBox}
-             className="message-box grow overflow-y-auto h-25 p-2"
+              ref={messageBox}
+              className="message-box grow overflow-y-auto h-25 p-2"
             >
-              <div className="incoming flex w-fit max-w-56 flex-col rounded-md bg-amber-50 p-2 m-2">
-                <small className="text-xs opacity-65">email@email.com</small>
-                <p className="text-sm">Lorem ipsum dolor sit amet.</p>
-              </div>
-              <div className="ml-auto flex w-fit max-w-56 flex-col rounded-md bg-amber-50 p-2 m-2">
-                <small className="text-xs opacity-65">email@email.com</small>
-                <p className="text-sm">Lorem ipsum dolor sit amet.</p>
-              </div>
+              {messages.map((msg, index) => (
+                <div
+                  key={index}
+                  className={`message flex max-w-56 flex-col rounded-md p-2 m-2
+      ${msg.sender._id === user._id ? "ml-auto bg-blue-100" : "bg-amber-50"}`}
+                >
+                  <small className="opacity-65 text-xs">
+                    {msg.sender.email}
+                  </small>
+
+                  <div className="text-sm">
+                    {msg.sender._id === "ai" ? (
+                      <Markdown>{msg.message}</Markdown>
+                    ) : (
+                      msg.message
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
 
             <div className="inputField flex w-full border-t border-slate-200 bg-white">

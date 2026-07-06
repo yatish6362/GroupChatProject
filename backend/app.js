@@ -16,4 +16,7 @@ app.use('/users',userRoute)
 import projectRoute from './routes/project.routes.js'
 app.use('/projects',projectRoute)
 
+import aiRoute from './routes/ai.routes.js'
+app.use('/ai',aiRoute)
+
 export default app;
